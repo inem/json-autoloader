@@ -2,17 +2,105 @@
 <html> 
   <head> 
     <title>json-autoloader.test</title> 
-    <script src="/jquery.js" type="text/javascript"></script> 
-    <script src="/jsclass/class.js" type="text/javascript"></script> 
+    <script src="jquery.js" type="text/javascript"></script> 
+    <script src="jsclass/class.js" type="text/javascript"></script> 
   </head>
   <body> 
     <div class='main'> 
         <script type='text/javascript'> 
           //<![CDATA[
-            //////////////////////////////////// _LIVE EVENTS
-            j(document).ready(function(){
+            jQuery.noConflict(); j = jQuery;
+            function cl(s) { if (typeof(console) != 'undefined') {console.log(s) } };
+
+            function getKey(obj){
+               for(i in obj ) if (obj.hasOwnProperty(i)) return i;
+            }
+
+            function getValue(obj, key){
+              eval("data = obj."+key);
+              return data;
+            }
+
+            function data2item(data){
+              var key = getKey(data);
+              var item = getValue(data, key);    
+              return item;
+            }
+
+            function data2array(hash){
+              var array = [];
+              hash.forEach(function(data){
+                array.push(data2item(data));
+              })
+              return array;
+            }
             
+            String.prototype.capitalize = function(){ //v1.0
+                return this.replace(/\w+/g, function(a){
+                    return a.charAt(0).toUpperCase() + a.substr(1).toLowerCase();
+                });
+            };
+            
+
+            j(document).ready(function(){
+              j.get('locations.json', {}, function(data){
+                // cl(data.items);
+                // cl(data.locations);
+                var locations = new Autoloader(data.locations);
+              }, 'json');
               
+            });
+
+            // Идем в цикле по data
+            // ключ - это класс объекта
+            // value - данные
+            // eval(key.capitalize())
+            // 
+            
+            // creating base class Autoloader
+            // and all our autoload classes should be inherited from it
+            // 
+            // store such classes in Autoloader class variable
+            
+            // in initialize
+            // it automatically understands class to be used for object and creates array of instances of such objects
+            // also it runs through all methods of objects
+            // and should create objects for arrays what matches with pattern
+            var Autoloader = new JS.Class({
+              extend : {
+                classes : []
+              },
+              initialize : function(hash) {
+                var array = [];
+                cl(hash);
+                hash.forEach(function(data){
+                  var key = getKey(data);
+                  var item = getValue(data, key);
+                  var classname = key.capitalize(); 
+                  Autoloader.classes.push(classname);
+                  eval("var obj = new "+ classname+"(item);")
+                  array.push(obj);
+                  cl(obj);
+                })
+                
+                
+              }
+            });            
+            
+            var Location = new JS.Class({
+              initialize: function(obj) {
+                // this.name = name;
+                j.extend(true, this, obj);
+                cl(this.id);
+              }
+            });
+            
+            var Item = new JS.Class({
+              initialize: function(obj) {
+                // this.name = name;
+                j.extend(true, this, obj);
+                cl(this.id);
+              }
             });
           //]]>
         </script> 

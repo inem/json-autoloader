@@ -12,11 +12,11 @@
         <script type='text/javascript'> 
           //<![CDATA[
 
+          Data = {};
+
           j.autoget = function(url,data) {
             j.get(url,data,function(response){
-              Autoloader.parse(response);
-              cl('done');
-              return 1;
+              return Autoloader.parse(response);
             },'json');
             // return j(this).attr('id');
           };
@@ -56,53 +56,104 @@
               }
             });
 
-            function arrInit(hash){
+
+            // { items : [{item: {}}, ...],
+            //   locations : []}
+            // 
+            function hashInit(hash){
               var new_hash = {};
               j.each(hash,function(k,v){
+                // cl(k);
+                // cl(v);
                 new_hash[k] = new_hash[k] ? new_hash[k] : []; 
-                new_hash[k].push(objInit(v));
-              }
+                new_hash[k] = arrInit(v);
+                cl(new_hash[k]);
+              });
               return new_hash;
             }
             
-            function objInit(hash){
-              j.each(hash,function(k, v){
+            // [{item: {}}, ...]
+            function arrInit(array){
+              // if (isArray(array)) {
+                var new_array = [];
+
+                array.forEach(function(item){
+                  // cl(item);
+                  new_array.push(objInit(item));
+                })
+                
+                return new_array;
+              // }
+              // else
+              //   return array;
+            }
+            
+            // {item: {id: 1, category_id : 2, ...}}
+            function objInit(item){
+              // cl(item);
+              var obj = '';              
+              j.each(item,function(k, v){
+                // cl(k);
+
                 var kl = k.capitalize();
                 eval("var klass = "+kl);
-                if(klass)
-                  return new klass(v);
-              })              
-            }
+                if(klass) {
+                  obj = new klass(v);
+                  // cl(obj);
+                  obj = argInit(obj);
+                  // for (i in obj) {
+                  //     // Firefix specific???
+                  //     if(i.constructor.name == 'Array')
+                  //       cl('babaka');
+                  //     // func.apply(this,[i,o[i]]);      
+                  //     // if (typeof(o[i])=="object") {
+                  //     //         //going on step down in the object tree!!
+                  //     //         traverse(o[i],func);
+                  //     // }
+                  // };
 
+                };
+                
+              });
+              return obj;
+            };
+            
+            // {id:1, items: [{nn:ddd, ss:ssa},{...}, ...]}
+            function argInit(hash){
+              var new_hash = {};
+              // cl(hash);
+              j.each(hash,function(k,v){
+                if (isArray(v)) {
+                  var kl = k.singularize().capitalize();
+                  eval("var klass = "+kl);
+                  // cl(klass);
+                  if(klass) {
+                    // cl(klass);
+                    new_hash[k] = new_hash[k] ? new_hash[k] : []; 
+                    new_hash[k] = argObjInit(v, klass);
+                    cl(new_hash[k]);
+                  }
+                }
+
+                // cl(v);
+              });
+              return new_hash;
+            }
+            
+            function argObjInit(hash, klass){
+              
+              obj = new klass(hash);
+              // cl(obj)
+              // obj = argInit(obj);
+              return obj;
+            }
+             
+                        
             var Autoloader = new JS.Class({
               extend: {
                 classes : ['items', 'locations'],
                 parse : function(response){
-                  j.each(response,function(k,v){
-                    // cl(k);
-                    // cl(Autoloader.classes[k]);
-                    if(Autoloader.classes.include(k)){
-                      
-                      // var kl = k.capitalize().singularize();
-                      v.forEach(function(item){
-                        j.each(item,function(ik, iv){
-                          // cl(ik);
-                          var kl = ik.capitalize();
-                          // cl(iv);
-                          // cl("var i = new "+kl+"();");
-                          eval("var i = new "+kl+"(iv);");
-                          
-                          // cl(i.id);
-                          // cl('--------------');
-                        })
-                        // eval("item = new "+kl+"()");
-                        // cl(i);
-                        // cl(item);
-                      })
-                      // cl(kl);
-                    }
-                  })
-
+                  Data.data = hashInit(response);
                 }
               },
               initialize : function(hash) {

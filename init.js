@@ -48,3 +48,14 @@ Array.prototype.index = function(val) {
 Array.prototype.include = function(val) {
   return this.index(val) !== null;
 };
+
+function classOf(o) {
+if (undefined === o) return "Undefined";
+if (null === o) return "Null";
+return {}.toString.call(o).slice(8, -1);
+}
+
+function isArray(o) {
+if ("Array" == classOf(o)) return true;
+return false;
+}

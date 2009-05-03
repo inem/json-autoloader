@@ -99,19 +99,7 @@
                 eval("var klass = "+kl);
                 if(klass) {
                   obj = new klass(v);
-                  // cl(obj);
                   obj = argInit(obj);
-                  // for (i in obj) {
-                  //     // Firefix specific???
-                  //     if(i.constructor.name == 'Array')
-                  //       cl('babaka');
-                  //     // func.apply(this,[i,o[i]]);      
-                  //     // if (typeof(o[i])=="object") {
-                  //     //         //going on step down in the object tree!!
-                  //     //         traverse(o[i],func);
-                  //     // }
-                  // };
-
                 };
                 
               });
@@ -140,6 +128,7 @@
               return new_hash;
             }
             
+            // {nn:ddd, ss:ssa}
             function argObjInit(hash, klass){
               
               obj = new klass(hash);
@@ -155,20 +144,20 @@
                 parse : function(response){
                   Data.data = hashInit(response);
                 }
-              },
-              initialize : function(hash) {
-                var array = [];
-                cl(hash);
-                hash.forEach(function(data){
-                  var key = getKey(data);
-                  var item = getValue(data, key);
-                  var classname = key.capitalize(); 
-                  Autoloader.classes.push(classname);
-                  eval("var obj = new "+ classname+"(item);")
-                  array.push(obj);
-                  cl(obj);
-                })
-              }
+              }// ,
+              //               initialize : function(hash) {
+              //                 var array = [];
+              //                 cl(hash);
+              //                 hash.forEach(function(data){
+              //                   var key = getKey(data);
+              //                   var item = getValue(data, key);
+              //                   var classname = key.capitalize(); 
+              //                   Autoloader.classes.push(classname);
+              //                   eval("var obj = new "+ classname+"(item);")
+              //                   array.push(obj);
+              //                   cl(obj);
+              //                 })
+              //               }
             });            
             
             var Loadable = new JS.Class({

@@ -3,6 +3,7 @@
   <head> 
     <title>json-autoloader.test</title> 
     <script src="jquery.js" type="text/javascript"></script> 
+    <!-- // <script src="pluralize.js" type="text/javascript"></script>  -->
     <script src="jsclass/class.js" type="text/javascript"></script> 
     <script src="init.js" type="text/javascript"></script> 
   </head>
@@ -10,13 +11,18 @@
     <div class='main'> 
         <script type='text/javascript'> 
           //<![CDATA[
+
+          j.autoget = function(url,data) {
+            j.get(url,data,function(response){
+              Autoloader.parse(response);
+              cl('done');
+              return 1;
+            },'json');
+            // return j(this).attr('id');
+          };
+
             j(document).ready(function(){
-              j.get('locations.json', {}, function(data){
-                // cl(data.items);
-                // cl(data.locations);
-                var locations = new Autoloader(data.locations);
-              }, 'json');
-              
+              j.autoget('locations.json', {});
             });
 
             // Идем в цикле по data
@@ -33,9 +39,71 @@
             // it automatically understands class to be used for object and creates array of instances of such objects
             // also it runs through all methods of objects
             // and should create objects for arrays what matches with pattern
+
+            var Location = new JS.Class({
+              initialize: function(obj) {
+                // this.name = name;
+                j.extend(true, this, obj);
+                // cl(this.id);
+              }
+            });
+            
+            var Item = new JS.Class({
+              initialize: function(obj) {
+                // this.name = name;
+                j.extend(true, this, obj);
+                // cl(this.id);
+              }
+            });
+
+            function arrInit(hash){
+              var new_hash = {};
+              j.each(hash,function(k,v){
+                new_hash[k] = new_hash[k] ? new_hash[k] : []; 
+                new_hash[k].push(objInit(v));
+              }
+              return new_hash;
+            }
+            
+            function objInit(hash){
+              j.each(hash,function(k, v){
+                var kl = k.capitalize();
+                eval("var klass = "+kl);
+                if(klass)
+                  return new klass(v);
+              })              
+            }
+
             var Autoloader = new JS.Class({
-              extend : {
-                classes : []
+              extend: {
+                classes : ['items', 'locations'],
+                parse : function(response){
+                  j.each(response,function(k,v){
+                    // cl(k);
+                    // cl(Autoloader.classes[k]);
+                    if(Autoloader.classes.include(k)){
+                      
+                      // var kl = k.capitalize().singularize();
+                      v.forEach(function(item){
+                        j.each(item,function(ik, iv){
+                          // cl(ik);
+                          var kl = ik.capitalize();
+                          // cl(iv);
+                          // cl("var i = new "+kl+"();");
+                          eval("var i = new "+kl+"(iv);");
+                          
+                          // cl(i.id);
+                          // cl('--------------');
+                        })
+                        // eval("item = new "+kl+"()");
+                        // cl(i);
+                        // cl(item);
+                      })
+                      // cl(kl);
+                    }
+                  })
+
+                }
               },
               initialize : function(hash) {
                 var array = [];
@@ -49,26 +117,46 @@
                   array.push(obj);
                   cl(obj);
                 })
-                
-                
               }
             });            
             
-            var Location = new JS.Class({
+            var Loadable = new JS.Class({
               initialize: function(obj) {
-                // this.name = name;
-                j.extend(true, this, obj);
-                cl(this.id);
+                Loadable.list.push(this.klass);
+                // j.extend(true, this, obj);
+                // cl(this.id);
               }
             });
             
-            var Item = new JS.Class({
-              initialize: function(obj) {
-                // this.name = name;
-                j.extend(true, this, obj);
-                cl(this.id);
-              }
-            });
+
+            // //called with every property and it's value
+            // function process(key,value) {
+            //     // cl(key + " : "+value);
+            //     if(key == 'items')
+            //       cl(key)
+            // };
+            // 
+            // function traverse(o,func) {
+            //   j.each(o, function(k,v){
+            //     cl(v)
+            //     
+            //   });
+            //     // for (i in o) {
+            //     //     // func.apply(this,[i,o[i]]);      
+            //     //     if (typeof(o[i])=="object") {
+            //     //             //going on step down in the object tree!!
+            //     //             traverse(o[i],func);
+            //     //     }
+            //     //     cl(typeof(o[i]) );
+            //     //     // if (typeof(o[i])=='Array'){
+            //     //     //   cl('dw');
+            //     //     // }
+            //     //   }
+            // };
+
+            // traverse(o,process);
+            
+
           //]]>
         </script> 
 

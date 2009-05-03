@@ -29,3 +29,22 @@ String.prototype.capitalize = function(){ //v1.0
         return a.charAt(0).toUpperCase() + a.substr(1).toLowerCase();
     });
 };
+
+String.prototype.singularize = function(){ //v1.0
+    return this.replace(/\w+/g, function(a){
+        return a.slice(0,-1);
+    });
+};
+
+
+
+Array.prototype.index = function(val) {
+  for(var i = 0, l = this.length; i < l; i++) {
+    if(this[i] == val) return i;
+  }
+  return null;
+};
+
+Array.prototype.include = function(val) {
+  return this.index(val) !== null;
+};
